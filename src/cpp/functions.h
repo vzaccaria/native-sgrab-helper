@@ -7,5 +7,6 @@
 // Implementations are in functions.cc
 
 NAN_METHOD(windowList);
+NAN_METHOD(getImageBuffer);
 
 #endif
