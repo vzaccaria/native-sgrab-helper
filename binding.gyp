@@ -5,6 +5,7 @@
             "src/cpp/nativeSgrabHelper.cpp",
             "src/cpp/functions.cc",
             "src/cpp/CoreGraphicsHelpers.cpp",
+            "src/cpp/json11/json11.cpp",
             "src/cpp/CF++/source/CFPP-Array.cpp",
             "src/cpp/CF++/source/CFPP-AutoPointer.cpp",
             "src/cpp/CF++/source/CFPP-Boolean.cpp",

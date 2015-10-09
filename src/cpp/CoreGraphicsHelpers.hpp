@@ -12,4 +12,4 @@ typedef std::vector<CGWindowInfo> CGWindowInfoList;
 
 CGWindowID   getWindowID(std::string wname);
 CGImageRef   getWindowImage(CGWindowID windowId);
-CGWindowInfoList getWindowList();
+std::string getWindowListAsJsonString();
