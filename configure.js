@@ -27,11 +27,16 @@ generateProject(_ => {
     _.verb("./verbfile.js", "docs/*.md")
   });
 
-    _.collectSeq("build-native", _ => {
+    _.collectSeq("rebuild-native", _ => {
         _.cmd("./node_modules/.bin/node-gyp clean")
         _.cmd("./node_modules/.bin/node-gyp configure")
         _.cmd("./node_modules/.bin/node-gyp build --verbose")
     })
+
+        _.collectSeq("build-native", _ => {
+        _.cmd("./node_modules/.bin/node-gyp build --verbose")
+    })
+
 
   _.collect("test", _ => {
     _.cmd("make all")
