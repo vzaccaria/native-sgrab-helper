@@ -1,14 +1,18 @@
 #include "CoreGraphicsHelpers.hpp"
 #include "json11/json11.hpp"
+#include "debug.hxx"
+#include "cppformat/format.h"
+#include <opencv2/opencv.hpp>
+
 #include <utility>
 // For returning a buffer from a pointer see:
 // http://www.samcday.com.au/blog/2011/03/03/creating-a-proper-buffer-in-a-node-c-addon/
 // See also https://github.com/nodejs/nan/blob/7b2ec2b742816c997cd652f7e22a91d0ab32651e/doc/buffers.md
 
-auto wOptionAll		= kCGWindowListOptionAll;
-auto wOnScreenOnly	= kCGWindowListOptionOnScreenOnly;
-auto wNullWindow	= kCGNullWindowID;
-auto wNoDesktop		= kCGWindowListExcludeDesktopElements;
+auto wOptionAll    = kCGWindowListOptionAll;
+auto wOnScreenOnly = kCGWindowListOptionOnScreenOnly;
+auto wNullWindow   = kCGNullWindowID;
+auto wNoDesktop    = kCGWindowListExcludeDesktopElements;
 
 using namespace std;
 
@@ -23,6 +27,8 @@ using namespace std;
 auto _wlopts = kCGWindowListOptionIncludingWindow;
 auto _wrect  = CGRectNull;
 auto _wcopts = kCGWindowImageBoundsIgnoreFraming;
+
+cv::Mat cgBuffer;
 
 using namespace std;
 using namespace json11;
@@ -68,38 +74,39 @@ CGWindowID getWindowID(string wname) {
 }
 
 CGImageRef getWindowImage(CGWindowID windowId) {
-
     return CGWindowListCreateImage(_wrect, _wlopts, windowId, _wcopts);
 }
 
-
-CGWindowBuffer getPointerToImage(CGImageRef windowImage) {
-    auto mutablePointer = CFDataCreateMutable(kCFAllocatorDefault, 0);
-    auto imgDest = CGImageDestinationCreateWithData(mutablePointer, kUTTypePNG, 1, nil);
-    CGImageDestinationAddImage(imgDest, windowImage, nil);
-    CGImageDestinationFinalize(imgDest);
-    unsigned int size = CFDataGetLength(mutablePointer);
-    const char *pointer = (const char *) __p(mutablePointer);
-    CGImageRelease(windowImage);
-    CFRelease(imgDest);
-    return _wbuf(pointer, size, mutablePointer);
+CGWindowBuffer getImageAsBuffer(CGWindowID windowId) {
+    auto ir = getWindowImage(windowId);
+    return convertImageRefToRGBA(ir);
 }
 
-CGWindowBuffer getImageAsBuffer(CGWindowID wid) {
-    auto imageDataRef = getWindowImage(wid);
-    return getPointerToImage(imageDataRef);
-}
+CGWindowBuffer convertImageRefToRGBA(CGImageRef imageRef) {
+    auto cols       = CGImageGetWidth(imageRef);
+    auto rows       = CGImageGetHeight(imageRef);
+    auto colorSpace = CGImageGetColorSpace(imageRef);
 
-void deallocateImageBuffer(CFMutableDataRef d) {
-    CFRelease(d);
-}
+    cgBuffer.create(rows, cols, CV_8UC4);
 
+    auto sizePixels = cols*rows;
 
-bool writeImage(CGImageRef windowImage, string path)
-{
-    auto fileName = (CF::URL::FileSystemURL(path));
-    auto imgDest     = CGImageDestinationCreateWithURL(fileName, kUTTypePNG, 1, NULL);
+    CGContextRef contextRef = CGBitmapContextCreate(
+        cgBuffer.data,             // Pointer to backing data
+        cols,                      // Width of bitmap
+        rows,                      // Height of bitmap
+        8,                         // Bits per component
+        cgBuffer.step[0],          // Bytes per row
+        colorSpace,                // Colorspace
+        kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault
+        );                                        // Bitmap info flags
 
-    CGImageDestinationAddImage(imgDest, windowImage, NULL);
-    return CGImageDestinationFinalize(imgDest);
+    CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), imageRef);
+    CGContextRelease(contextRef);
+    CGImageRelease(imageRef);
+    auto sizeBytes = cgBuffer.step[0] * cgBuffer.rows;
+    debugf("Size of picture         : {} x {} = {} pixels", cols, rows, sizePixels);
+    debugf("Size of buffer in bytes : {}", sizeBytes);
+
+    return { (const char *) cgBuffer.data, sizeBytes, rows, cols } ;
 }

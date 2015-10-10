@@ -6,6 +6,7 @@
             "src/cpp/functions.cc",
             "src/cpp/CoreGraphicsHelpers.cpp",
             "src/cpp/json11/json11.cpp",
+            "src/cpp/cppformat/format.cc",
             "src/cpp/CF++/source/CFPP-Array.cpp",
             "src/cpp/CF++/source/CFPP-AutoPointer.cpp",
             "src/cpp/CF++/source/CFPP-Boolean.cpp",
@@ -41,7 +42,8 @@
                     "libraries": [
                         "-framework CoreGraphics",
                         "-framework CoreServices",
-                        "-framework CoreFoundation"
+                        "-framework CoreFoundation",
+                        "-L/usr/local/Cellar/opencv/2.4.11/lib -lopencv_calib3d -lopencv_contrib -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_gpu -lopencv_highgui -lopencv_imgproc -lopencv_legacy -lopencv_ml -lopencv_nonfree -lopencv_objdetect -lopencv_ocl -lopencv_photo -lopencv_stitching -lopencv_superres -lopencv_ts -lopencv_video -lopencv_videostab"
                     ]
                 }
             }]

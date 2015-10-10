@@ -1,20 +1,34 @@
 var nativeSgrabHelper = require('bindings')('nativeSgrabHelper');
 var fs = require('fs')
+var _ = require('lodash')
 
-function writeImageToBuf(file, wid) {
-    let ff = fs.createWriteStream(file)
-    ff.write(nativeSgrabHelper.getImageBuffer(wid));
-    ff.end();
+function windowListAsJson() {
+    return JSON.parse(nativeSgrabHelper.windowList());
 }
 
-function bombThisMachine(wid) {
-    setInterval(() => {
-        writeImageToBuf('pippo.png', wid);
-    }, 200)
+function getForefrontWindow() {
+    let list = windowListAsJson()
+    return _.first(_.filter(list, (it) => it.layer == 0))
 }
 
-bombThisMachine(114);
+function getForefrontWindowBuffer() {
+    return nativeSgrabHelper.getImageBuffer(getForefrontWindow().wid)
+}
 
 module.exports = {
-    nativeSgrabHelper, writeImageToBuf, bombThisMachine
+    nativeSgrabHelper, windowListAsJson, getForefrontWindow, getForefrontWindowBuffer
 };
+
+function test() {
+    var Jpeg = require('jpeg-fresh').Jpeg;
+
+    var {
+        buf, rows, cols
+    } = getForefrontWindowBuffer()
+
+    var jpeg = new Jpeg(buf, cols, rows, 'rgba');
+    var im = jpeg.encodeSync();
+    fs.writeFile('./prova.jpg', im, {
+                encoding: 'binary'
+            })
+}

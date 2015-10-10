@@ -1,20 +1,36 @@
 #include "functions.h"
 #include "CoreGraphicsHelpers.hpp"
 
+
+#define _c(x)                       ((x).ToLocalChecked())
+#define __js_new(obj)               v8::Local<v8::Object> obj = Nan::New<v8::Object>()
+#define __js_sets(obj, name, value) obj->Set(name, value)
+#define __js_setn(obj, name, value) obj->Set(name, value)
+
 #define __js_argAsInt(i)   (info[i]->IntegerValue())
-#define __js_return(x)     (info.GetReturnValue().Set((x).ToLocalChecked()))
+
+
+#define __js_string(o)     (Nan::New(o))
+#define __js_uint(o)        (Nan::New((uint32_t) o))
+#define __js_return(x)     (info.GetReturnValue().Set((x)))
+#define _s(o)              __js_string(string(o))
+#define _i(o)              __js_uint(o)
+#define _b(pointer, size)  (Nan::CopyBuffer(pointer, size))
 
 NAN_METHOD(windowList) {
-    __js_return(Nan::New(getWindowListAsJsonString()));
+    auto ss = _c(__js_string(getWindowListAsJsonString()));
+    __js_return(ss);
 }
+
+using namespace std;
 
 NAN_METHOD(getImageBuffer) {
     /* Get parameter */
     auto wid = __js_argAsInt(0);
     auto wb = getImageAsBuffer(wid);
-
-    auto pointer = _wbuf_getPointer(wb);
-    auto size = _wbuf_getSize(wb);
-    __js_return(Nan::CopyBuffer(pointer, size));
-    deallocateImageBuffer(_wbuf_getMutableDataRef(wb));
+    __js_new(x);
+    __js_sets(x, _c(_s("cols")), _i(wb.cols));
+    __js_sets(x, _c(_s("rows")), _i(wb.rows));
+    __js_sets(x, _c(_s("buf")), _c(_b(wb.pointer, wb.size)));
+    __js_return(x);
 }

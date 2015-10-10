@@ -39,6 +39,8 @@ generateProject(function(_) {
                 _.clang("test.cpp", "**/*.hpp");
                 _.clang("CF++/**/*.cpp", "**/*.hpp");
                 _.clang("json11/**/*.cpp", "**/*.hpp");
+                _.clang("cppformat/**/format.cc", "**/*.h");
+
             })
         })
         _.cmd("chmod +x test.x")

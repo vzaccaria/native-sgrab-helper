@@ -3,3 +3,6 @@ lib
 makefile
 api.md
 /index.js
+/prova.jpg
+/prova.png
+*.xcodeproj*

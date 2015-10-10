@@ -12,17 +12,18 @@ typedef std::vector<CGWindowInfo> CGWindowInfoList;
 
 typedef struct {
     const char *pointer;
-    unsigned int size;
-    CFMutableDataRef mutableDataRef;
+    unsigned long size;
+    unsigned long rows;
+    unsigned long cols;
 } CGWindowBuffer;
 
 #define _wbuf(p, i, m) { p, i, m }
 #define _wbuf_getPointer(x)        (x.pointer)
 #define _wbuf_getSize(x)           (x.size)
-#define _wbuf_getMutableDataRef(x) (x.mutableDataRef)
+
+std::string getWindowListAsJsonString();
 
 CGWindowID   getWindowID(std::string wname);
 CGImageRef   getWindowImage(CGWindowID windowId);
-std::string getWindowListAsJsonString();
-CGWindowBuffer getImageAsBuffer(CGWindowID wid);
-void deallocateImageBuffer(CFMutableDataRef);
+CGWindowBuffer getImageAsBuffer(CGWindowID windowId);
+CGWindowBuffer convertImageRefToRGBA(CGImageRef imageRef);
