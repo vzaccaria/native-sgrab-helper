@@ -5,6 +5,7 @@
             "src/cpp/nativeSgrabHelper.cpp",
             "src/cpp/functions.cc",
             "src/cpp/CoreGraphicsHelpers.cpp",
+            "src/cpp/OpenCVHelpers.cpp",
             "src/cpp/json11/json11.cpp",
             "src/cpp/cppformat/format.cc",
             "src/cpp/CF++/source/CFPP-Array.cpp",

@@ -8,5 +8,6 @@
 
 NAN_METHOD(windowList);
 NAN_METHOD(getImageBuffer);
+NAN_METHOD(getImageBufferResized);
 
 #endif

@@ -11,7 +11,7 @@
 
 
 #define __js_string(o)     (Nan::New(o))
-#define __js_uint(o)        (Nan::New((uint32_t) o))
+#define __js_uint(o)       (Nan::New((uint32_t) o))
 #define __js_return(x)     (info.GetReturnValue().Set((x)))
 #define _s(o)              __js_string(string(o))
 #define _i(o)              __js_uint(o)
@@ -28,6 +28,19 @@ NAN_METHOD(getImageBuffer) {
     /* Get parameter */
     auto wid = __js_argAsInt(0);
     auto wb = getImageAsBuffer(wid);
+    __js_new(x);
+    __js_sets(x, _c(_s("cols")), _i(wb.cols));
+    __js_sets(x, _c(_s("rows")), _i(wb.rows));
+    __js_sets(x, _c(_s("buf")), _c(_b(wb.pointer, wb.size)));
+    __js_return(x);
+}
+
+NAN_METHOD(getImageBufferResized) {
+    /* Get parameter */
+    auto wid = __js_argAsInt(0);
+    auto width = __js_argAsInt(1);
+    auto height = __js_argAsInt(2);
+    auto wb = getImageAsBufferResized(wid, width, height);
     __js_new(x);
     __js_sets(x, _c(_s("cols")), _i(wb.cols));
     __js_sets(x, _c(_s("rows")), _i(wb.rows));

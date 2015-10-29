@@ -26,4 +26,5 @@ std::string getWindowListAsJsonString();
 CGWindowID   getWindowID(std::string wname);
 CGImageRef   getWindowImage(CGWindowID windowId);
 CGWindowBuffer getImageAsBuffer(CGWindowID windowId);
+CGWindowBuffer getImageAsBufferResized(CGWindowID windowId, unsigned int, unsigned int);
 CGWindowBuffer convertImageRefToRGBA(CGImageRef imageRef);

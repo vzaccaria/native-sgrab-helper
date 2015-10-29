@@ -3,6 +3,7 @@
 #include "debug.hxx"
 #include "cppformat/format.h"
 #include <opencv2/opencv.hpp>
+#include "OpenCVHelpers.hpp"
 
 #include <utility>
 // For returning a buffer from a pointer see:
@@ -28,7 +29,6 @@ auto _wlopts = kCGWindowListOptionIncludingWindow;
 auto _wrect  = CGRectNull;
 auto _wcopts = kCGWindowImageBoundsIgnoreFraming;
 
-cv::Mat cgBuffer;
 
 using namespace std;
 using namespace json11;
@@ -77,36 +77,66 @@ CGImageRef getWindowImage(CGWindowID windowId) {
     return CGWindowListCreateImage(_wrect, _wlopts, windowId, _wcopts);
 }
 
-CGWindowBuffer getImageAsBuffer(CGWindowID windowId) {
-    auto ir = getWindowImage(windowId);
-    return convertImageRefToRGBA(ir);
-}
 
-CGWindowBuffer convertImageRefToRGBA(CGImageRef imageRef) {
-    auto cols       = CGImageGetWidth(imageRef);
-    auto rows       = CGImageGetHeight(imageRef);
+cv::Mat cgBuffer;
+unsigned int cgWidth;
+unsigned int cgHeight;
+
+void convertImageRefToCGBuf(CGImageRef imageRef) {
+    cgWidth = CGImageGetWidth(imageRef);
+    cgHeight = CGImageGetHeight(imageRef);
     auto colorSpace = CGImageGetColorSpace(imageRef);
 
-    cgBuffer.create(rows, cols, CV_8UC4);
+    cgBuffer.create(cgHeight, cgWidth, CV_8UC4);
 
-    auto sizePixels = cols*rows;
 
     CGContextRef contextRef = CGBitmapContextCreate(
         cgBuffer.data,             // Pointer to backing data
-        cols,                      // Width of bitmap
-        rows,                      // Height of bitmap
+        cgWidth,                      // Width of bitmap
+        cgHeight,                      // Height of bitmap
         8,                         // Bits per component
         cgBuffer.step[0],          // Bytes per row
         colorSpace,                // Colorspace
         kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault
         );                                        // Bitmap info flags
 
-    CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), imageRef);
+    CGContextDrawImage(contextRef, CGRectMake(0, 0, cgWidth, cgHeight), imageRef);
     CGContextRelease(contextRef);
     CGImageRelease(imageRef);
+}
+
+CGWindowBuffer convertImageRefToRGBAWSize(unsigned int finalWidth, unsigned finalHeight) {
+    cv::Mat destBuffer(finalHeight, finalWidth, CV_8UC4);
+    resizeKeepAspectRatio(cgBuffer, destBuffer);
+    auto sizeBytes = destBuffer.step[0] * destBuffer.rows;
+    return { (const char *) destBuffer.data, sizeBytes, finalHeight, finalWidth} ;
+}
+
+CGWindowBuffer convertImageRefToRGBAWoSize() {
     auto sizeBytes = cgBuffer.step[0] * cgBuffer.rows;
-    debugf("Size of picture         : {} x {} = {} pixels", cols, rows, sizePixels);
+    auto sizePixels = cgWidth*cgHeight;
+    debugf("Size of picture         : {} x {} = {} pixels", cgWidth, cgHeight, sizePixels);
     debugf("Size of buffer in bytes : {}", sizeBytes);
 
-    return { (const char *) cgBuffer.data, sizeBytes, rows, cols } ;
+    return { (const char *) cgBuffer.data, sizeBytes, cgHeight, cgWidth } ;
+}
+
+CGWindowBuffer convertImageRefToRGBAResize(CGImageRef imageRef, unsigned int finalWidth, unsigned int finalHeight) {
+    convertImageRefToCGBuf(imageRef);
+    return convertImageRefToRGBAWSize(finalWidth, finalHeight);
+}
+
+CGWindowBuffer convertImageRefToRGBA(CGImageRef imageRef) {
+    convertImageRefToCGBuf(imageRef);
+    return convertImageRefToRGBAWoSize();
+}
+
+CGWindowBuffer getImageAsBuffer(CGWindowID windowId) {
+    auto ir = getWindowImage(windowId);
+    return convertImageRefToRGBA(ir);
+}
+
+CGWindowBuffer getImageAsBufferResized(CGWindowID windowId, unsigned int finalWidth, unsigned int finalHeight) {
+    auto ir = getWindowImage(windowId);
+    return convertImageRefToRGBAResize(ir, finalWidth, finalHeight);
 }
