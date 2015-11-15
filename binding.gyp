@@ -3,7 +3,7 @@
         "target_name": "nativeSgrabHelper",
         "sources": [
             "src/cpp/nativeSgrabHelper.cpp",
-            "src/cpp/functions.cc",
+            "src/cpp/exportedFunctions.cc",
             "src/cpp/CoreGraphicsHelpers.cpp",
             "src/cpp/OpenCVHelpers.cpp",
             "src/cpp/json11/json11.cpp",

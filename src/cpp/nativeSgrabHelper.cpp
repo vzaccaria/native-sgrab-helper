@@ -1,4 +1,4 @@
-#include "functions.h"
+#include "exportedFunctions.h"
 
 using v8::FunctionTemplate;
 
