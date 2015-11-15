@@ -1,6 +1,6 @@
 {
   "name": "native-sgrab-helper",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Native screen-grab helper for electron. Works only for OSX at the moment.",
   "main": "index.js",
   "scripts": {
