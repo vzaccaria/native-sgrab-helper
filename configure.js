@@ -23,23 +23,25 @@ generateProject(_ => {
         _.verb("./verbfile.js", "docs/*.md")
     })
 
-    _.collectSeq("all", _ => {
+    _.collectSeq("build-js", _ => {
         _.collect("build", _ => {
             _.babel("src/*.js")
         })
         _.cmd("cp ./lib/index.js ./index.js")
-        _.cmd("make build-native");
-        _.cmd("DEBUG=* node index.js");
-    });
-
-    _.collectSeq("rebuild-native", _ => {
-        _.cmd("./node_modules/.bin/node-gyp clean")
-        _.cmd("./node_modules/.bin/node-gyp configure")
-        _.cmd("./node_modules/.bin/node-gyp build --verbose")
     })
 
-    _.collectSeq("build-native", _ => {
-        _.cmd("./node_modules/.bin/node-gyp build --verbose")
+    _.collectSeq("all", _ => {
+        _.cmd("echo 'this is intended for dev only (no electron), you really should run npm install'");
+        _.cmd("make build-js");
+        _.cmd("./node_modules/.bin/node-gyp build")
+    });
+
+    _.collectSeq("dist-clean", _ => {
+        _.cmd("echo 'this is intended for dev only'");
+        _.cmd("make clean")
+        _.cmd("rm -rf build");
+        _.cmd("./node_modules/.bin/node-gyp clean")
+        _.cmd("./node_modules/.bin/node-gyp configure")
     })
 
 

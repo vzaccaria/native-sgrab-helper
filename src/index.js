@@ -1,5 +1,4 @@
 var nativeSgrabHelper = require('bindings')('nativeSgrabHelper');
-var fs = require('fs')
 var _ = require('lodash')
 
 function windowListAsJson() {
@@ -18,17 +17,3 @@ function getForefrontWindowBuffer() {
 module.exports = {
     nativeSgrabHelper, windowListAsJson, getForefrontWindow, getForefrontWindowBuffer
 };
-
-function test() {
-    var Jpeg = require('jpeg-fresh').Jpeg;
-
-    var {
-        buf, rows, cols
-    } = getForefrontWindowBuffer()
-
-    var jpeg = new Jpeg(buf, cols, rows, 'rgba');
-    var im = jpeg.encodeSync();
-    fs.writeFile('./prova.jpg', im, {
-                encoding: 'binary'
-            })
-}
